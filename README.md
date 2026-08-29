@@ -8,7 +8,7 @@ actually goes, and watch a bamboo stalk fill as you approach a savings goal.
 There are no accounts and no server: the app is static files, and the ledger
 lives in `localStorage` on whichever device you opened it on.
 
-**Live:** _(not yet deployed)_
+**Live:** https://midterm-project-webdvt-two.vercel.app/
 **Repo:** https://github.com/Caelusary/midterm-project-webdvt
 
 ## Running locally
