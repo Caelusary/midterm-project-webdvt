@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom'
 import { useTransactions } from '../hooks/useTransactions'
 import { useSettings } from '../hooks/useSettings'
 import { useBudgets, usePeriod } from '../hooks/useBudgets'
-import { ALL_TIME, formatMonth, inPeriod, monthOf, shiftMonth } from '../lib/period'
+import {
+  ALL_TIME, formatMonth, inMonthSuffix, inPeriod, latestMonth, monthOf, shiftMonth,
+} from '../lib/period'
 import { overBudgetCategories } from '../lib/budgets'
 import { categoryColor } from '../lib/format'
 import { cents, round2 } from '../lib/money'
@@ -44,6 +46,9 @@ export default function Summary() {
   const { format } = useSettings()
   const { period, setPeriod } = usePeriod()
   const { budgets } = useBudgets()
+
+  // Keeps a future-dated transaction reachable in the month stepper.
+  const furthestMonth = useMemo(() => latestMonth(transactions), [transactions])
 
   const { breakdown, totalSpent, totalEarned, topCategory } = useMemo(() => {
     const totals = {}
@@ -119,7 +124,7 @@ export default function Summary() {
         </div>
       </header>
 
-      <PeriodPicker period={period} onChange={setPeriod}>
+      <PeriodPicker period={period} onChange={setPeriod} furthestMonth={furthestMonth}>
         <span className="period-figure">
           <span className="period-figure-label">Spent</span>
           <span className="period-figure-value is-expense">{format(totalSpent)}</span>
@@ -135,7 +140,7 @@ export default function Summary() {
       </PeriodPicker>
 
       {breakdown.length === 0 ? (
-        <EmptyState icon="chart" title={`No expenses recorded in ${formatMonth(period)}`} />
+        <EmptyState icon="chart" title={`No expenses recorded${inMonthSuffix(period)}`} />
       ) : (
         <>
           <section className="panel chart-panel">
@@ -153,8 +158,8 @@ export default function Summary() {
                 {topCategory.category}
               </p>
               <p className="page-sub">
-                {format(topCategory.amount)} — {topCategory.percent}% of everything you spent in
-                {' '}{formatMonth(period)}, across {breakdown.length}{' '}
+                {format(topCategory.amount)} — {topCategory.percent}% of everything you
+                spent{inMonthSuffix(period)}, across {breakdown.length}{' '}
                 {breakdown.length === 1 ? 'category' : 'categories'}.
               </p>
 
