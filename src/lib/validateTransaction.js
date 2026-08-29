@@ -1,7 +1,7 @@
 import { todayISO } from './format'
 
-// Mirrors the CHECK constraints on public.transactions. The database is the
-// real guard; this exists to give a readable message before the round trip.
+// Outer bounds for a stored transaction. Nothing else validates these, so
+// these limits are the only guard against a nonsense amount or date.
 const MAX_AMOUNT = 1000000000000
 
 function yearsFromToday(years) {
