@@ -3,7 +3,7 @@ import { cents, isOver, round2 } from './money'
 
 /**
  * Expense totals per category for a period. One implementation, used by the
- * Dashboard, Insights, Budgets and the Add form — they previously each had
+ * Dashboard, Summary, Budgets and the Add form — they previously each had
  * their own, and they disagreed about whether a zero limit counted as "over".
  */
 export function spendByCategory(transactions, period) {
