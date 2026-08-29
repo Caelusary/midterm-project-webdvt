@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { KEYS, newId, nowISO, read, write } from '../lib/storage'
-import { ALL_TIME } from '../lib/period'
-import { materialiseRecurring } from '../lib/recurring'
+import { currentMonth } from '../lib/period'
+import { materialiseRecurring, newRule } from '../lib/recurring'
 import { describeTransaction, logActivities, logActivity } from '../lib/activity'
 
 const DataContext = createContext(null)
@@ -13,9 +13,8 @@ const EMPTY_SETTINGS = { savings_goal: 0, currency: 'PHP' }
  *
  * Every mutation writes storage first and only updates state once that
  * succeeds, so what is on screen is always what was actually saved. The write
- * is synchronous, which is why nothing here needs the optimistic-update and
- * rollback dance the server-backed version required — but these functions stay
- * async so pages can keep awaiting them.
+ * is synchronous, so there is no optimistic-update-and-rollback step to get
+ * wrong — but these functions stay async so pages can keep awaiting them.
  */
 export function DataProvider({ children }) {
   const boot = bootstrap()
@@ -26,10 +25,10 @@ export function DataProvider({ children }) {
   // Fixed for the life of the page: the only way loading the ledger can fail
   // is storage being unavailable, which will not change while the tab is open.
   const error = boot.error
-  // Opens on every transaction, not the current month: the Dashboard is
-  // specified as listing all transactions, and a first-time visitor whose data
-  // spans months should not have to find the period control to see it.
-  const [period, setPeriod] = useState(ALL_TIME)
+  // Opens on the current month. Budgets are monthly and the Summary compares
+  // month against month, so a month is the scope the rest of the app is built
+  // around; "All time" stays one click away in the period bar.
+  const [period, setPeriod] = useState(currentMonth)
 
   // Mirrors the lists so a mutation can capture the pre-change rows
   // synchronously. Reading state inside a setState updater instead would run
@@ -144,7 +143,7 @@ export function DataProvider({ children }) {
 
       setSettings(next)
 
-      // One entry per field that genuinely moved. The Account form submits
+      // One entry per field that genuinely moved. The Settings page submits
       // every field, so comparing against the previous value is what keeps a
       // save with nothing changed from filling the log with noise.
       const changes = []
@@ -205,7 +204,7 @@ export function DataProvider({ children }) {
   }, [])
 
   const addRule = useCallback(async (input) => {
-    const rule = { ...input, id: newId(), created_at: nowISO() }
+    const rule = newRule(input)
     const nextRules = sortRules([...rulesRef.current, rule])
 
     const failure = write(KEYS.rules, nextRules)
