@@ -4,9 +4,8 @@ import { KEYS, newId, nowISO, read, write } from './storage'
  * Append-only record of what the user did, newest first.
  *
  * Capped rather than unbounded: the log shares a ~5MB localStorage budget with
- * the ledger itself, and a deletion snapshot is a whole transaction row. The
- * old server-backed version kept everything and only ever displayed the most
- * recent 200, so the visible behaviour is unchanged until the cap is reached.
+ * the ledger itself, and a deletion snapshot is a whole transaction row. Two
+ * hundred entries is far more than the page ever shows at once.
  */
 const LIMIT = 200
 
