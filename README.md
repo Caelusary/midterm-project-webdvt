@@ -204,9 +204,14 @@ Summary page, spending higher than last month points up in *red* — the number
 rose, and that is not good news. The arrow reports direction, the colour reports
 judgement.
 
-The period bar opens on the current month, because budgets are monthly limits
-and the Summary compares one month against the previous one. "All time" is one
-click away, and the Balance figure is always lifetime regardless of the period.
+The period bar opens on **All time**, so the Dashboard lists everything on a
+first visit. Budgets moves it to the current month on arrival, because a monthly
+limit has nothing to compare against over a lifetime.
+
+**Balance is always lifetime**, whatever the period says — a balance is what you
+have, and money carries over from one month to the next. The month's own figure
+is **Net**, in the period bar. Income and Expenses do follow the picker, so each
+of those cards names the scope it is showing.
 
 ## Recurring rules
 
