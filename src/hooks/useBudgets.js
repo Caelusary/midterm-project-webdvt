@@ -6,7 +6,7 @@ export function useBudgets() {
   return { budgets, setBudget, removeBudget }
 }
 
-/** The month currently being viewed, shared by the Dashboard, Insights and Budgets. */
+/** The month currently being viewed, shared by the Dashboard, Summary and Budgets. */
 export function usePeriod() {
   const { period, setPeriod } = useData()
   return { period, setPeriod }
