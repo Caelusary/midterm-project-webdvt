@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { KEYS, newId, nowISO, read, write } from '../lib/storage'
-import { currentMonth } from '../lib/period'
+import { ALL_TIME } from '../lib/period'
 import { materialiseRecurring, newRule } from '../lib/recurring'
 import { describeTransaction, logActivities, logActivity } from '../lib/activity'
 
@@ -25,10 +25,11 @@ export function DataProvider({ children }) {
   // Fixed for the life of the page: the only way loading the ledger can fail
   // is storage being unavailable, which will not change while the tab is open.
   const error = boot.error
-  // Opens on the current month. Budgets are monthly and the Summary compares
-  // month against month, so a month is the scope the rest of the app is built
-  // around; "All time" stays one click away in the period bar.
-  const [period, setPeriod] = useState(currentMonth)
+  // Opens on every transaction, not the current month: the Dashboard is
+  // specified as listing all transactions, and a first-time visitor whose data
+  // spans months should not have to find the period control to see it. Budgets
+  // moves the period to a month itself, because a monthly limit needs one.
+  const [period, setPeriod] = useState(ALL_TIME)
 
   // Mirrors the lists so a mutation can capture the pre-change rows
   // synchronously. Reading state inside a setState updater instead would run
