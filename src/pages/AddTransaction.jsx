@@ -75,6 +75,12 @@ export default function AddTransaction() {
   const amountValue = Number(form.amount) || 0
   const isIncome = form.type === 'income'
 
+  // The preview has three states, not two. Until a type is picked the row is
+  // neither income nor expense, and `isIncome ? … : …` would quietly render it
+  // as an expense — a red −₱0.00 asserting something the user never entered.
+  const hasType = Boolean(form.type)
+  const tone = !hasType ? 'is-unset' : isIncome ? 'is-income' : 'is-expense'
+
   // Accepts either a patch object or a function of the current form, so a
   // field can be set from the value of another (the calculator appends a note).
   function setField(patch) {
@@ -143,17 +149,21 @@ export default function AddTransaction() {
           <div className="panel">
             <span className="stat-label">Preview</span>
             <div className="preview-row">
-              <span className={`row-badge ${isIncome ? 'is-income' : 'is-expense'}`} aria-hidden="true">
-                {isIncome ? '↓' : '↑'}
+              <span className={`row-badge ${tone}`} aria-hidden="true">
+                {hasType ? (isIncome ? '↑' : '↓') : '•'}
               </span>
               <span className="row-main">
-                <span className="row-title">{form.description || 'Description'}</span>
+                <span className={`row-title${form.description ? '' : ' is-placeholder'}`}>
+                  {form.description || 'Description'}
+                </span>
                 <span className="row-meta">
                   {form.category || 'Category'} · {formatDate(form.date) || 'Date'}
                 </span>
               </span>
-              <span className={`row-amount ${isIncome ? 'is-income' : 'is-expense'}`}>
-                {isIncome ? '+' : '−'}{format(amountValue)}
+              <span className={`row-amount ${tone}`}>
+                {amountValue > 0
+                  ? `${hasType ? (isIncome ? '+' : '−') : ''}${format(amountValue)}`
+                  : '—'}
               </span>
             </div>
             <p className="hint">This is how it will appear on your dashboard.</p>
