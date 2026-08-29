@@ -35,8 +35,29 @@ export function formatMonth(month) {
   })
 }
 
-export function isFutureMonth(month) {
-  return month > currentMonth()
+/**
+ * The trailing " in August 2026" for a sentence, or nothing at all when the
+ * scope is all time — "recorded in All time" is not a sentence anyone meant
+ * to write.
+ */
+export function inMonthSuffix(period) {
+  return period === ALL_TIME ? '' : ` in ${formatMonth(period)}`
+}
+
+/**
+ * The month of the furthest-dated transaction, or null when there are none.
+ *
+ * Transactions may be dated ahead of today — next month's rent, logged now —
+ * and the month stepper has to know, or those months are unreachable while
+ * their amounts still count toward the balance.
+ */
+export function latestMonth(transactions) {
+  let furthest = null
+  for (const item of transactions) {
+    const month = monthOf(item.date)
+    if (!furthest || month > furthest) furthest = month
+  }
+  return furthest
 }
 
 export function inPeriod(transaction, period) {
@@ -65,7 +86,7 @@ function parseISO(value) {
  * Asking for the 31st in February gives the 28th (or 29th) rather than
  * silently skipping the month — so "the 31st" reads as end-of-month.
  */
-export function monthlyDate(month, dayOfMonth) {
+function monthlyDate(month, dayOfMonth) {
   const day = Math.min(dayOfMonth, daysInMonth(month))
   return `${month}-${String(day).padStart(2, '0')}`
 }
