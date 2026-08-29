@@ -1,10 +1,10 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useTransactions } from '../hooks/useTransactions'
 import { useSettings } from '../hooks/useSettings'
 import { useBudgets, usePeriod } from '../hooks/useBudgets'
 import { useToast } from '../context/ToastContext'
 import { CATEGORIES_BY_TYPE } from '../constants'
-import { ALL_TIME, inMonthSuffix, latestMonth } from '../lib/period'
+import { ALL_TIME, currentMonth, inMonthSuffix, latestMonth } from '../lib/period'
 import { spendByCategory } from '../lib/budgets'
 import { categoryColor } from '../lib/format'
 import { cents, isOver, round2 } from '../lib/money'
@@ -17,6 +17,17 @@ export default function Budgets() {
   const { period, setPeriod } = usePeriod()
   const { budgets, setBudget, removeBudget } = useBudgets()
   const { notify } = useToast()
+
+  // A limit is a monthly figure, so "all time" is not a scope it can be
+  // compared against — lifetime spending against a monthly cap reads as wildly
+  // over budget once the ledger spans more than one month. Landing here from
+  // another page moves the shared period to this month rather than showing a
+  // comparison that is arithmetically meaningless.
+  useEffect(() => {
+    if (period === ALL_TIME) setPeriod(currentMonth())
+    // Mount only: re-running this would fight the user picking "All time".
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Keeps a future-dated transaction reachable in the month stepper.
   const furthestMonth = useMemo(() => latestMonth(transactions), [transactions])
