@@ -118,7 +118,11 @@ export default function Layout() {
           entrance animation. Hidden from assistive tech while the drawer is
           open — the keyboard has already been moved out of it by then. */}
       <main className="content" aria-hidden={drawerOpen || undefined}>
-        <div className="page-enter" key={location.pathname}>
+        {/* Keyed on location.key, not pathname: navigating to the page you
+            are already on is still a new navigation, and pages that read
+            location.state on mount (the Add form's duplicate prefill) have to
+            remount for that state to clear. */}
+        <div className="page-enter" key={location.key}>
           <Outlet />
         </div>
       </main>
