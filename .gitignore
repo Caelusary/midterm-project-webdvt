@@ -12,6 +12,16 @@ dist
 dist-ssr
 *.local
 
+# Environment (the app needs none, but never commit one if it appears)
+.env
+.env.*
+
+# Vercel CLI project linkage
+.vercel
+
+# Local agent/editor scratch
+.claude/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

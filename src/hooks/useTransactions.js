@@ -1,40 +1,30 @@
-import { useCallback, useState } from "react";
+import { useData } from '../context/DataContext'
 
-const STORAGE_KEY = 'budget-transactions'
-
-function readFromStorage() {
-    try {
-        const raw = localStorage.getItem(STORAGE_KEY)
-        return raw ? JSON.parse(raw) : []
-    } catch {
-        return []
-    }
-}
-
+/**
+ * Reading and writing transactions to persistent storage (this browser's
+ * localStorage).
+ *
+ * Every page uses this one hook — no page touches storage directly and no
+ * persistence logic is duplicated anywhere. Writes go to storage first and
+ * only reach state once they land, so what is on screen is always what was
+ * actually saved.
+ */
 export function useTransactions() {
-    const [transactions, setTransactions] =
-useState(readFromStorage)
+  const {
+    transactions,
+    error,
+    addTransaction,
+    updateTransaction,
+    deleteTransaction,
+    restoreTransaction,
+  } = useData()
 
-    const persist = useCallback((updater) => {
-        setTransactions(current => {
-            const next = updater(current)
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
-            return next
-        })
-    }, [])
-
-    const addTransaction = useCallback((transaction) => {
-        const entry = { ...transaction, id: crypto.randomUUID() }
-        persist(current => [entry, ...current])
-    }, [persist])
-
-    const updateTransaction = useCallback((id, updates) => {
-        persist(current => current.map(item => (item.id === id ? { ...item, ...updates } : item)))
-    }, [persist])
-
-    const deleteTransaction = useCallback((id) => {
-        persist(current => current.filter(item => item.id !== id))
-    }, [persist])
-
-    return { transactions, addTransaction, updateTransaction, deleteTransaction }
+  return {
+    transactions,
+    error,
+    addTransaction,
+    updateTransaction,
+    deleteTransaction,
+    restoreTransaction,
+  }
 }
