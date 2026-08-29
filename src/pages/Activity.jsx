@@ -35,7 +35,7 @@ function timeAgo(value) {
 }
 
 export default function Activity() {
-  const { transactions, restoreTransaction, restoreRule } = useData()
+  const { transactions, rules, restoreTransaction, restoreRule } = useData()
   const { notify } = useToast()
 
   // The log comes straight out of localStorage, so there is nothing to wait
@@ -56,7 +56,10 @@ export default function Activity() {
     if (entry.entity === 'transaction') {
       return !transactions.some(item => item.id === entry.entity_id)
     }
-    return entry.entity === 'rule'
+    if (entry.entity === 'rule') {
+      return !rules.some(rule => rule.id === entry.entity_id)
+    }
+    return false
   }
 
   async function handleRestore(entry) {
