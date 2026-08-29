@@ -282,12 +282,29 @@ The alternative reading — down means "money into your wallet" — is legitimat
 but then the arrow means something different on the Summary page than on a
 transaction row. One rule beats two.
 
-### "Why does the Dashboard open on this month instead of everything?"
+### "Is the Balance for this month or for everything?"
 
-Budgets are monthly limits and the Summary compares one month against the last,
-so a month is the unit the app is built around. "All time" is one click away in
-the period bar, and the **Balance** figure is always lifetime regardless of the
-period — it's labelled "All time — total income minus total expenses".
+Everything, always — and that's deliberate. A balance is what you *have*, and
+money carries over from one month into the next, so resetting it on the 1st
+would be wrong. It's labelled "All time — total income minus total expenses".
+
+The month's own figure exists too: it's **Net**, in the period bar. So the
+Dashboard answers both questions with two different numbers.
+
+Income and Expenses *do* follow the period picker, which is why those two cards
+name their scope underneath. Pick August and Expenses drops to August's total
+while Balance holds steady — that's not a bug, the labels say which is which.
+
+### "Why does the Dashboard open on all time, but Budgets on a month?"
+
+The Dashboard is specified as listing all transactions, so it opens on
+everything and a visitor whose data spans months sees it without hunting for a
+control.
+
+Budgets is the exception because a limit is a *monthly* figure. Comparing
+lifetime spending against a monthly cap says you're wildly over budget the
+moment your ledger passes one month, which is meaningless. So arriving on that
+page moves the period to the current month.
 
 ### "Why does the preview show a dash before I fill anything in?"
 
