@@ -1,16 +1,22 @@
-import { ALL_TIME, currentMonth, formatMonth, isFutureMonth, shiftMonth } from '../lib/period'
+import { ALL_TIME, currentMonth, formatMonth, shiftMonth } from '../lib/period'
 
 /**
  * Month stepper with an all-time escape hatch, plus room on the right for a
  * figure — so the bar carries information rather than only controls.
  *
- * Stepping forward stops at the current month; there is nothing to see in the
- * future.
+ * Stepping forward stops at this month, or at `furthestMonth` when something
+ * is dated later than that.
  */
-export default function PeriodPicker({ period, onChange, children }) {
+export default function PeriodPicker({ period, onChange, furthestMonth, children }) {
   const isAll = period === ALL_TIME
   const nextMonth = isAll ? null : shiftMonth(period, 1)
-  const canGoForward = !isAll && !isFutureMonth(nextMonth)
+
+  // Normally there is nothing past this month to look at, but a transaction
+  // dated ahead of today has to stay reachable — otherwise it counts toward
+  // the balance from a month the stepper refuses to visit.
+  const lastMonth =
+    furthestMonth && furthestMonth > currentMonth() ? furthestMonth : currentMonth()
+  const canGoForward = !isAll && nextMonth <= lastMonth
 
   return (
     <div className="period-bar">
