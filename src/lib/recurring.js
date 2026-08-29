@@ -3,13 +3,27 @@ import { describeTransaction, logActivities } from './activity'
 import { newId, nowISO } from './storage'
 
 /**
+ * The shape a rule takes when it is first created.
+ *
+ * `active` defaults on, because a rule the user just filled in and saved is
+ * meant to start posting — left undefined it reads as falsy and the rule is
+ * skipped below, which is a rule that silently does nothing. Spreading `input`
+ * afterwards still lets a caller pass `active: false` deliberately.
+ *
+ * This lives here rather than inline in the provider so the default is
+ * testable without mounting React.
+ */
+export function newRule(input) {
+  return { active: true, ...input, id: newId(), created_at: nowISO() }
+}
+
+/**
  * Builds any transactions an active rule owes, then reports how far each rule
  * has caught up so the caller can advance its watermark.
  *
  * Safe to run on every load: dueDates() starts from last_created_on, and any
- * date a rule has already posted is skipped by fingerprint. The database used
- * to enforce that with a unique index; with no database, the existing ledger is
- * the thing being deduplicated against.
+ * date a rule has already posted is skipped by fingerprint — the existing
+ * ledger is what each candidate date is deduplicated against.
  *
  * Pure — it returns rows rather than saving them, so the caller stays the only
  * writer and one failed save cannot leave the ledger half-updated.
