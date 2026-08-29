@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { useSettings } from '../hooks/useSettings'
-import { currencySymbol } from '../lib/format'
 import { isOver } from '../lib/money'
+import MoneyInput from './MoneyInput'
 
 export default function BudgetRow({ category, spent, limit, color, onSave, onRemove }) {
-  const { currency, format } = useSettings()
+  const { format } = useSettings()
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState('')
   const [busy, setBusy] = useState(false)
@@ -23,6 +23,8 @@ export default function BudgetRow({ category, spent, limit, color, onSave, onRem
 
   async function save(event) {
     event.preventDefault()
+    // required + min="1" mean the browser blocks empty, zero and negative
+    // before this runs; this stays as a guard, not as the user-facing message.
     const next = Number(draft)
     if (!Number.isFinite(next) || next <= 0) return
     setBusy(true)
@@ -71,13 +73,8 @@ export default function BudgetRow({ category, spent, limit, color, onSave, onRem
 
         {editing ? (
           <form className="budget-form" onSubmit={save}>
-            <div className="input-prefix">
-              <span>{currencySymbol(currency)}</span>
-              <input type="number" min="1" step="1" value={draft} autoFocus
-                onWheel={event => event.currentTarget.blur()}
-                onChange={event => setDraft(event.target.value)}
-                aria-label={`Monthly limit for ${category}`} />
-            </div>
+            <MoneyInput min="1" step="1" required autoFocus value={draft}
+              onChange={setDraft} aria-label={`Monthly limit for ${category}`} />
             <button type="submit" className="button button-primary" disabled={busy}>Save</button>
             <button type="button" className="button" onClick={() => setEditing(false)}>Cancel</button>
           </form>
