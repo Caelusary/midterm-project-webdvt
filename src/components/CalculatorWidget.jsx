@@ -48,9 +48,12 @@ export default function CalculatorWidget() {
         setOpen(false)
         return
       }
-      // Leave real inputs alone — someone typing in a form is not typing here.
-      const tag = event.target.tagName
-      if (tag === 'INPUT' || tag === 'TEXTAREA') return
+      // Leave the page's own controls alone. This listener is on document, so
+      // without this it would swallow Enter from a focused Save button and
+      // stop the Add form submitting while the calculator happens to be open.
+      // The calculator's own keys are buttons too, and Enter already clicks
+      // those natively.
+      if (event.target.closest('input, textarea, select, button, [contenteditable]')) return
 
       if (/^[0-9.]$/.test(event.key)) {
         event.preventDefault()
