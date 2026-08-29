@@ -29,15 +29,26 @@ export function read(key, fallback) {
     const raw = window.localStorage.getItem(key)
     if (raw === null) return fallback
     const parsed = JSON.parse(raw)
-    return parsed ?? fallback
+    if (parsed === null || parsed === undefined) return fallback
+
+    // Parsing is not enough: hand-edited or half-written JSON can be valid and
+    // still be the wrong shape, and spreading an object where a list is
+    // expected throws inside bootstrap() — during render, where the error
+    // boundary's Reload button just hits it again. The fallback describes the
+    // shape the caller needs, so anything that disagrees is treated as absent.
+    if (Array.isArray(fallback)) return Array.isArray(parsed) ? parsed : fallback
+    if (typeof fallback === 'object') {
+      return typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : fallback
+    }
+    return parsed
   } catch {
     return fallback
   }
 }
 
 /**
- * Writes a key, returning an error message or null — the same contract the
- * Supabase calls used to have, so callers still roll back the same way.
+ * Writes a key, returning an error message or null rather than throwing, so
+ * callers can check the result and leave state untouched when a write fails.
  */
 export function write(key, value) {
   try {
