@@ -10,12 +10,6 @@ export function cents(value) {
   return Math.round((Number(value) || 0) * 100)
 }
 
-/** Sum a list of amounts and return a clean two-decimal number. */
-export function sumAmounts(values) {
-  const total = values.reduce((running, value) => running + cents(value), 0)
-  return total / 100
-}
-
 /** a > b, in cents. */
 export function isOver(a, b) {
   return cents(a) > cents(b)
