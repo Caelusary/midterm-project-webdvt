@@ -4,7 +4,7 @@ import { useSettings } from '../hooks/useSettings'
 import { useBudgets, usePeriod } from '../hooks/useBudgets'
 import { useToast } from '../context/ToastContext'
 import { CATEGORIES_BY_TYPE } from '../constants'
-import { ALL_TIME, formatMonth } from '../lib/period'
+import { ALL_TIME, inMonthSuffix, latestMonth } from '../lib/period'
 import { spendByCategory } from '../lib/budgets'
 import { categoryColor } from '../lib/format'
 import { cents, isOver, round2 } from '../lib/money'
@@ -17,6 +17,9 @@ export default function Budgets() {
   const { period, setPeriod } = usePeriod()
   const { budgets, setBudget, removeBudget } = useBudgets()
   const { notify } = useToast()
+
+  // Keeps a future-dated transaction reachable in the month stepper.
+  const furthestMonth = useMemo(() => latestMonth(transactions), [transactions])
 
   const spentByCat = useMemo(
     () => spendByCategory(transactions, period),
@@ -85,7 +88,7 @@ export default function Budgets() {
         </div>
       </header>
 
-      <PeriodPicker period={period} onChange={setPeriod}>
+      <PeriodPicker period={period} onChange={setPeriod} furthestMonth={furthestMonth}>
         <span className="period-figure">
           <span className="period-figure-label">Budgeted</span>
           <span className="period-figure-value">{format(totals.budgeted)}</span>
@@ -120,7 +123,7 @@ export default function Budgets() {
           <p className="hint">
             {totals.withLimits === 0
               ? 'No limits set yet — pick a category below to start.'
-              : `${totals.withLimits} of ${rows.length} categories have a limit in ${formatMonth(period)}.${totals.over > 0 ? ` ${totals.over} over.` : ''}`}
+              : `${totals.withLimits} of ${rows.length} categories have a limit${inMonthSuffix(period)}.${totals.over > 0 ? ` ${totals.over} over.` : ''}`}
           </p>
         </div>
 
