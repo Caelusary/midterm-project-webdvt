@@ -5,7 +5,7 @@ import { useSettings } from '../hooks/useSettings'
 import { useBudgets, usePeriod } from '../hooks/useBudgets'
 import { useToast } from '../context/ToastContext'
 import { ALL_CATEGORIES, TYPES } from '../constants'
-import { ALL_TIME, inMonthSuffix, inPeriod, latestMonth } from '../lib/period'
+import { ALL_TIME, formatMonth, inMonthSuffix, inPeriod, latestMonth } from '../lib/period'
 import { netBalance, overBudgetCategories } from '../lib/budgets'
 import { cents, round2 } from '../lib/money'
 import TransactionRow from '../components/TransactionRow'
@@ -184,13 +184,17 @@ export default function Dashboard() {
           </span>
           <span className="stat-note">All time — total income minus total expenses</span>
         </article>
+        {/* These two follow the period picker while Balance above does not,
+            so each says which scope it is showing. */}
         <article className="stat-card">
           <span className="stat-label">Income</span>
           <span className="stat-value is-income">{format(totals.income)}</span>
+          <span className="stat-note">{formatMonth(period)}</span>
         </article>
         <article className="stat-card">
           <span className="stat-label">Expenses</span>
           <span className="stat-value is-expense">{format(totals.expenses)}</span>
+          <span className="stat-note">{formatMonth(period)}</span>
         </article>
       </section>
 
