@@ -1,7 +1,7 @@
 import { categoryOptionsFor, TYPES } from '../constants'
-import { currencySymbol } from '../lib/format'
 import { useSettings } from '../hooks/useSettings'
 import { useCalculator } from '../context/CalculatorContext'
+import MoneyInput from './MoneyInput'
 import Select from './Select'
 
 /**
@@ -13,7 +13,7 @@ import Select from './Select'
  * type→category coupling live here.
  */
 export default function TransactionFields({ form, errors, onField, notePlaceholder }) {
-  const { currency, format } = useSettings()
+  const { format } = useSettings()
   const { total: calcTotal, expression, hasInput: hasCalcInput, hasError } = useCalculator()
 
   // Switching type invalidates the chosen category — "Rent" is not income.
@@ -42,12 +42,8 @@ export default function TransactionFields({ form, errors, onField, notePlacehold
       <div className="field-row">
         <div className="field">
           <label htmlFor="amount">Amount</label>
-          <div className="input-prefix">
-            <span>{currencySymbol(currency)}</span>
-            <input id="amount" type="number" step="0.01" min="0" value={form.amount}
-              placeholder="0.00" onWheel={event => event.currentTarget.blur()}
-              onChange={event => onField({ amount: event.target.value })} />
-          </div>
+          <MoneyInput id="amount" value={form.amount} placeholder="0.00"
+            onChange={amount => onField({ amount })} />
           {errors.amount && <p className="error">{errors.amount}</p>}
           {hasCalcInput && !hasError && (
             <button type="button" className="link-button" onClick={applyCalculator}>
