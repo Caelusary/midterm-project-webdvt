@@ -1,12 +1,11 @@
-import { useMemo, useState } from 'react'
+import { useDeferredValue, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTransactions } from '../hooks/useTransactions'
 import { useSettings } from '../hooks/useSettings'
 import { useBudgets, usePeriod } from '../hooks/useBudgets'
 import { useToast } from '../context/ToastContext'
 import { ALL_CATEGORIES, TYPES } from '../constants'
-import { currencySymbol } from '../lib/format'
-import { ALL_TIME, formatMonth, inPeriod } from '../lib/period'
+import { ALL_TIME, inMonthSuffix, inPeriod, latestMonth } from '../lib/period'
 import { netBalance, overBudgetCategories } from '../lib/budgets'
 import { cents, round2 } from '../lib/money'
 import TransactionRow from '../components/TransactionRow'
@@ -14,6 +13,7 @@ import PeriodPicker from '../components/PeriodPicker'
 import Bamboo from '../components/Bamboo'
 import EmptyState from '../components/EmptyState'
 import Select from '../components/Select'
+import MoneyInput from '../components/MoneyInput'
 
 const PAGE_SIZE = 25
 
@@ -33,7 +33,7 @@ const SORT_OPTIONS = [
 
 export default function Dashboard() {
   const { transactions, error } = useTransactions()
-  const { savingsGoal, currency, updateSettings, format } = useSettings()
+  const { savingsGoal, updateSettings, format } = useSettings()
   const { period, setPeriod } = usePeriod()
   const { budgets } = useBudgets()
   const { notify } = useToast()
@@ -71,8 +71,16 @@ export default function Dashboard() {
   // whichever month happens to be on screen.
   const lifetimeBalance = useMemo(() => netBalance(transactions), [transactions])
 
+  // Keeps a future-dated transaction reachable in the month stepper.
+  const furthestMonth = useMemo(() => latestMonth(transactions), [transactions])
+
+  // The list lags the box by a frame or two instead of blocking each keystroke:
+  // filtering, copying and sorting the whole ledger is the expensive part, and
+  // it does not have to finish before the character appears.
+  const deferredQuery = useDeferredValue(query)
+
   const visible = useMemo(() => {
-    const needle = query.trim().toLowerCase()
+    const needle = deferredQuery.trim().toLowerCase()
     // "1,200" and "₱1200" should both find a 1200 amount.
     const numeric = needle.replace(/[^0-9.]/g, '')
 
@@ -100,11 +108,11 @@ export default function Dashboard() {
       return a.date > b.date ? -1 : a.date < b.date ? 1 : 0
     })
     return sorted
-  }, [periodTransactions, category, type, query, sort])
+  }, [periodTransactions, category, type, deferredQuery, sort])
 
   // Categories whose limit is already blown this month, surfaced here rather
   // than only on the two pages you have to go looking for. Shared helper, so
-  // this page can't disagree with Insights and Budgets about what "over" means.
+  // this page can't disagree with Summary and Budgets about what "over" means.
   const overBudget = useMemo(() => {
     if (period === ALL_TIME || budgets.length === 0) return []
     return overBudgetCategories(transactions, budgets, period).map(row => row.category)
@@ -126,14 +134,20 @@ export default function Dashboard() {
 
   async function saveGoal(event) {
     event.preventDefault()
-    const next = Number(goalDraft)
-    if (!Number.isFinite(next) || next < 0) return
+    // An empty box is not a request to set the goal to zero, so it saves
+    // nothing. Typing an explicit 0 does clear the goal, and says so.
+    const trimmed = goalDraft.trim()
+    const next = Number(trimmed)
+    if (!trimmed || !Number.isFinite(next) || next < 0) return
     setEditingGoal(false)
     const message = await updateSettings({ savings_goal: next })
     notify(
       message
         ? { message: `Could not save the goal: ${message}`, tone: 'danger' }
-        : { message: 'Savings goal updated.', tone: 'success' }
+        : {
+            message: next === 0 ? 'Savings goal cleared.' : 'Savings goal updated.',
+            tone: 'success',
+          }
     )
   }
 
@@ -146,7 +160,7 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <PeriodPicker period={period} onChange={changePeriod}>
+      <PeriodPicker period={period} onChange={changePeriod} furthestMonth={furthestMonth}>
         <span className="period-figure">
           <span className="period-figure-label">Entries</span>
           <span className="period-figure-value">{periodTransactions.length}</span>
@@ -201,13 +215,8 @@ export default function Dashboard() {
 
           {editingGoal ? (
             <form className="goal-form" onSubmit={saveGoal}>
-              <div className="input-prefix">
-                <span>{currencySymbol(currency)}</span>
-                <input type="number" min="0" step="1" value={goalDraft} autoFocus
-                  onWheel={event => event.currentTarget.blur()}
-                  onChange={event => setGoalDraft(event.target.value)}
-                  aria-label="Savings goal amount" />
-              </div>
+              <MoneyInput min="0" step="1" autoFocus value={goalDraft}
+                onChange={setGoalDraft} aria-label="Savings goal amount" />
               <button type="submit" className="button button-primary">Save</button>
               <button type="button" className="button" onClick={() => setEditingGoal(false)}>
                 Cancel
@@ -220,8 +229,24 @@ export default function Dashboard() {
               </span>
               {savingsGoal > 0 && (
                 <p className="goal-progress">
-                  <strong>{percent}%</strong> there — {format(lifetimeBalance)} saved of all time,
-                  {' '}{format(Math.max(0, savingsGoal - lifetimeBalance))} to go
+                  {/* Three cases, because "saved" is the wrong word for a
+                      negative balance and "₱0.00 to go" is a limp way to say
+                      you made it. The figure is lifetime, not the month on
+                      screen, so it says "in total" next to a period picker. */}
+                  {lifetimeBalance >= savingsGoal ? (
+                    <>Goal reached — {format(lifetimeBalance)} saved in total.</>
+                  ) : lifetimeBalance < 0 ? (
+                    <>
+                      <strong>{percent}%</strong> there — you've spent{' '}
+                      {format(Math.abs(lifetimeBalance))} more than you've taken in,{' '}
+                      {format(savingsGoal - lifetimeBalance)} to go
+                    </>
+                  ) : (
+                    <>
+                      <strong>{percent}%</strong> there — {format(lifetimeBalance)} saved
+                      in total, {format(savingsGoal - lifetimeBalance)} to go
+                    </>
+                  )}
                 </p>
               )}
               <button type="button" className="button" onClick={startEditingGoal}>
@@ -270,7 +295,7 @@ export default function Dashboard() {
               transactions.length === 0
                 ? 'No transactions yet'
                 : periodTransactions.length === 0
-                  ? `Nothing recorded in ${formatMonth(period)}`
+                  ? `Nothing recorded${inMonthSuffix(period)}`
                   : 'Nothing matches those filters'
             }
           >
