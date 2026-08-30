@@ -8,12 +8,6 @@ actually goes, and watch a bamboo stalk fill as you approach a savings goal.
 There are no accounts and no server: the app is static files, and the ledger
 lives in `localStorage` on whichever device you opened it on.
 
-**Live:** https://midterm-project-webdvt-two.vercel.app/
-**Repo:** https://github.com/Caelusary/midterm-project-webdvt
-
-> Preparing for the oral defence? [**QA.md**](QA.md) has likely questions and
-> worked answers, including the follow-ups behind the obvious ones.
-
 ## Running locally
 
 Requires Node 20.19+ (or 22.12+). No configuration, no environment variables,
