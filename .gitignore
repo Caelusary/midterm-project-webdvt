@@ -21,7 +21,6 @@ dist-ssr
 
 # Local agent/editor scratch
 .claude/
-HANDOFF.md
 
 # Editor directories and files
 .vscode/*
