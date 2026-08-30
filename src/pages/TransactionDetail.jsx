@@ -156,7 +156,7 @@ export default function TransactionDetail() {
 
   return (
     <>
-      <Link to="/" className="back-link">← Back to dashboard</Link>
+      <Link to="/" className="back-link" aria-label="Back to dashboard">←</Link>
 
       <article className="panel detail-panel">
         <span className={`detail-tag ${isIncome ? 'is-income' : 'is-expense'}`}>
