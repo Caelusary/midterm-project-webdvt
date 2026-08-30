@@ -233,15 +233,30 @@ a { color: var(--accent-text); }
 
 .page-sub { margin: 4px 0 0; color: var(--muted); font-size: 14px; }
 
+/* Just the arrow in a round pill. The word is dropped because the glyph reads
+   on its own, but two things the text used to provide have to be rebuilt: the
+   accessible name (an aria-label on the link) and the hit area, which the pill
+   now makes visible instead of leaving it an invisible box. */
 .back-link {
-  display: inline-block;
-  margin-bottom: 18px;
-  font-size: 14px;
-  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  margin-bottom: 14px;
+  font-size: 22px;
+  line-height: 1;
+  color: var(--text-soft);
+  background: var(--surface-3);
+  border-radius: 50%;
   text-decoration: none;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
-.back-link:hover { color: var(--text); }
+.back-link:hover {
+  color: var(--text);
+  background: var(--border);
+}
 
 .panel {
   background: var(--surface);
