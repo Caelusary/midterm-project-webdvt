@@ -1445,6 +1445,8 @@ textarea { resize: vertical; }
   .stat-value { font-size: 24px; }
   .period-bar { justify-content: flex-start; }
   .period-label { min-width: 0; flex: 1; }
+  /* 34-38px is fine for a mouse; fingers need 44px. */
+  .icon-button, .period-step, .back-link { width: 44px; height: 44px; }
   .budget-actions, .budget-form { margin-left: 0; }
 }
 
