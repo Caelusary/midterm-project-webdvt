@@ -158,7 +158,7 @@ export default function Summary() {
                 {topCategory.category}
               </p>
               <p className="page-sub">
-                {format(topCategory.amount)} — {topCategory.percent}% of everything you
+                {format(topCategory.amount)}, {topCategory.percent}% of everything you
                 spent{inMonthSuffix(period)}, across {breakdown.length}{' '}
                 {breakdown.length === 1 ? 'category' : 'categories'}.
               </p>
