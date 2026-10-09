@@ -14,6 +14,33 @@ export const KEYS = {
   budgets: `${PREFIX}budgets`,
   rules: `${PREFIX}rules`,
   activity: `${PREFIX}activity`,
+  // The stored shape's version, so a later build knows what it is reading.
+  schema: `${PREFIX}schema`,
+  // Verbatim copies of anything the loader could not read, never overwritten
+  // by the app's own data. See loadLedger() in schema.js.
+  recovered: `${PREFIX}recovered`,
+}
+
+/**
+ * Reads a key without guessing at a fallback, so the caller can tell a value
+ * that was never written from one that was written and is now unreadable.
+ * `raw` is the stored string, kept so an unreadable value can be set aside.
+ */
+export function readRaw(key) {
+  let raw
+  try {
+    raw = window.localStorage.getItem(key)
+  } catch {
+    return { status: 'missing', value: undefined, raw: null }
+  }
+  if (raw === null) return { status: 'missing', value: undefined, raw }
+  try {
+    const value = JSON.parse(raw)
+    if (value === null || value === undefined) return { status: 'missing', value: undefined, raw }
+    return { status: 'ok', value, raw }
+  } catch {
+    return { status: 'corrupt', value: undefined, raw }
+  }
 }
 
 /**
@@ -60,7 +87,7 @@ export function write(key, value) {
     if (error?.name === 'QuotaExceededError' || error?.code === 22) {
       return 'Browser storage is full. Export your data, then clear some of the activity log.'
     }
-    return 'Could not save — this browser is blocking local storage.'
+    return 'Could not save: this browser is blocking local storage.'
   }
 }
 
