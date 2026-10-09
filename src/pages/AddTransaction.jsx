@@ -213,7 +213,7 @@ export default function AddTransaction() {
                   {amountValue > 0 && (
                     <>
                       {' '}This takes you to {format(projected)}
-                      {willBeOver ? ` — ${format(projected - budgetView.limit)} over.` : '.'}
+                      {willBeOver ? `, ${format(projected - budgetView.limit)} over.` : '.'}
                     </>
                   )}
                 </p>
