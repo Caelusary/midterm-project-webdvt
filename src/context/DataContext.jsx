@@ -1,12 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
-import { KEYS, newId, nowISO, read, write } from '../lib/storage'
+import { KEYS, newId, nowISO, write } from '../lib/storage'
+import { loadLedger, sanitiseSettings } from '../lib/schema'
 import { ALL_TIME } from '../lib/period'
 import { materialiseRecurring, newRule } from '../lib/recurring'
 import { describeTransaction, logActivities, logActivity } from '../lib/activity'
 
 const DataContext = createContext(null)
-
-const EMPTY_SETTINGS = { savings_goal: 0, currency: 'PHP' }
 
 /**
  * The whole ledger, held in state and mirrored into localStorage.
@@ -25,6 +24,10 @@ export function DataProvider({ children }) {
   // Fixed for the life of the page: the only way loading the ledger can fail
   // is storage being unavailable, which will not change while the tab is open.
   const error = boot.error
+  // Set when loading had to repair or set aside stored data. Dismissable, and
+  // only ever shown once per load.
+  const [notice, setNotice] = useState(boot.notice)
+  const dismissNotice = useCallback(() => setNotice(''), [])
   // Opens on every transaction, not the current month: the Dashboard is
   // specified as listing all transactions, and a first-time visitor whose data
   // spans months should not have to find the period control to see it. Budgets
@@ -137,7 +140,7 @@ export function DataProvider({ children }) {
   const updateSettings = useCallback(
     async (updates) => {
       const previous = settings
-      const next = normaliseSettings({ ...settings, ...updates })
+      const next = sanitiseSettings({ ...settings, ...updates })
 
       const failure = write(KEYS.settings, next)
       if (failure) return failure
@@ -330,10 +333,62 @@ export function DataProvider({ children }) {
     return null
   }, [])
 
+  // ---- backup ---------------------------------------------------------------
+
+  /**
+   * Replaces the whole ledger with a cleaned backup. Each key is written
+   * before any state changes, so a failure part-way leaves the screen showing
+   * what storage held before rather than a mix of the two.
+   */
+  const replaceLedger = useCallback(async (data) => {
+    const nextTransactions = sortTransactions(data.transactions)
+    const nextRules = sortRules(data.rules)
+    const nextSettings = sanitiseSettings(data.settings)
+
+    const previous = {
+      transactions: transactionsRef.current,
+      rules: rulesRef.current,
+      budgets: budgetsRef.current,
+    }
+    const writes = [
+      [KEYS.transactions, nextTransactions],
+      [KEYS.rules, nextRules],
+      [KEYS.budgets, data.budgets],
+      [KEYS.settings, nextSettings],
+    ]
+    for (const [key, value] of writes) {
+      const failure = write(key, value)
+      if (failure) {
+        // Put back whatever was already overwritten, best-effort.
+        write(KEYS.transactions, previous.transactions)
+        write(KEYS.rules, previous.rules)
+        write(KEYS.budgets, previous.budgets)
+        return failure
+      }
+    }
+
+    setTransactions(nextTransactions)
+    setRules(nextRules)
+    setBudgets(data.budgets)
+    setSettings(nextSettings)
+    setNotice('')
+    logActivity({
+      action: 'restored',
+      entity: 'backup',
+      summary: 'Restored from a backup file',
+      detail: `${nextTransactions.length} transactions, ${nextRules.length} rules, ${data.budgets.length} budgets`,
+    })
+    return null
+  }, [])
+
   const value = useMemo(
     () => ({
       transactions,
       error,
+      notice,
+      dismissNotice,
+      replaceLedger,
+      settings,
       period,
       setPeriod,
       restoreRule,
@@ -356,6 +411,9 @@ export function DataProvider({ children }) {
     [
       transactions,
       error,
+      notice,
+      dismissNotice,
+      replaceLedger,
       period,
       addTransaction,
       updateTransaction,
@@ -393,8 +451,11 @@ let booted = null
 function bootstrap() {
   if (booted) return booted
 
-  const rules = sortRules(read(KEYS.rules, []))
-  const transactions = sortTransactions(read(KEYS.transactions, []))
+  // Repaired and migrated before anything renders, so no page ever sees a row
+  // that would crash it. A notice says when something had to be set aside.
+  const ledger = loadLedger()
+  const rules = sortRules(ledger.rules)
+  const transactions = sortTransactions(ledger.transactions)
   const generated = materialiseRecurring(rules, transactions)
 
   let error = ''
@@ -432,21 +493,12 @@ function bootstrap() {
   booted = {
     transactions: nextTransactions,
     rules: nextRules,
-    budgets: read(KEYS.budgets, []),
-    settings: normaliseSettings(read(KEYS.settings, {})),
+    budgets: ledger.budgets,
+    settings: ledger.settings,
     error,
+    notice: ledger.notice,
   }
   return booted
-}
-
-// Stored JSON is only as trustworthy as whatever wrote it last, and a
-// savings_goal that came back as a string would break every comparison
-// downstream.
-function normaliseSettings(stored) {
-  return {
-    savings_goal: Number(stored?.savings_goal) || EMPTY_SETTINGS.savings_goal,
-    currency: stored?.currency || EMPTY_SETTINGS.currency,
-  }
 }
 
 function sortTransactions(list) {
