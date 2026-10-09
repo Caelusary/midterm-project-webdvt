@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { Outlet, useLocation } from 'react-router-dom'
+import { Link, Outlet, useLocation } from 'react-router-dom'
 import Sidebar from './Sidebar'
 import CalculatorWidget from './CalculatorWidget'
+import { useData } from '../context/DataContext'
 
 const MOBILE_QUERY = '(max-width: 768px)'
 
@@ -12,6 +13,7 @@ export default function Layout() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(() => window.matchMedia(MOBILE_QUERY).matches)
   const location = useLocation()
+  const { notice, dismissNotice } = useData()
   const [lastPath, setLastPath] = useState(location.pathname)
 
   const menuButtonRef = useRef(null)
@@ -122,6 +124,15 @@ export default function Layout() {
             are already on is still a new navigation, and pages that read
             location.state on mount (the Add form's duplicate prefill) have to
             remount for that state to clear. */}
+        {notice && (
+          <div className="storage-notice" role="status">
+            <p>
+              {notice} Back up your data from{' '}
+              <Link to="/settings" onClick={dismissNotice}>Settings</Link> to keep a copy.
+            </p>
+            <button type="button" className="button" onClick={dismissNotice}>Dismiss</button>
+          </div>
+        )}
         <div className="page-enter" key={location.key}>
           <Outlet />
         </div>
