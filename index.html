@@ -4,17 +4,9 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Budgy — your budgeting buddy</title>
-    <script>
-      (function () {
-        var stored = localStorage.getItem('budget-theme');
-        if (stored === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
-      })();
-    </script>
-    <meta name="description" content="Budgy — track income and expenses, set category budgets, and watch your savings goal grow." />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <title>Budgy · your budgeting buddy</title>
+    <script src="/theme-init.js"></script>
+    <meta name="description" content="Budgy: track income and expenses, set category budgets, and watch your savings goal grow." />
   </head>
   <body>
     <div id="root"></div>
