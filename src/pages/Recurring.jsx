@@ -50,7 +50,7 @@ export default function Recurring() {
       <header className="page-head">
         <div>
           <h1>Recurring</h1>
-          <p className="page-sub">Rent, allowance, the daily commute — logged automatically.</p>
+          <p className="page-sub">Rent, allowance, the daily commute, logged automatically.</p>
         </div>
       </header>
 
