@@ -182,7 +182,7 @@ export default function Dashboard() {
           <span className={`stat-value ${lifetimeBalance < 0 ? 'is-expense' : ''}`}>
             {format(lifetimeBalance)}
           </span>
-          <span className="stat-note">All time — total income minus total expenses</span>
+          <span className="stat-note">All time: total income minus total expenses</span>
         </article>
         {/* These two follow the period picker while Balance above does not,
             so each says which scope it is showing. */}
@@ -238,16 +238,16 @@ export default function Dashboard() {
                       you made it. The figure is lifetime, not the month on
                       screen, so it says "in total" next to a period picker. */}
                   {lifetimeBalance >= savingsGoal ? (
-                    <>Goal reached — {format(lifetimeBalance)} saved in total.</>
+                    <>Goal reached: {format(lifetimeBalance)} saved in total.</>
                   ) : lifetimeBalance < 0 ? (
                     <>
-                      <strong>{percent}%</strong> there — you've spent{' '}
+                      <strong>{percent}%</strong> there. You've spent{' '}
                       {format(Math.abs(lifetimeBalance))} more than you've taken in,{' '}
                       {format(savingsGoal - lifetimeBalance)} to go
                     </>
                   ) : (
                     <>
-                      <strong>{percent}%</strong> there — {format(lifetimeBalance)} saved
+                      <strong>{percent}%</strong> there, {format(lifetimeBalance)} saved
                       in total, {format(savingsGoal - lifetimeBalance)} to go
                     </>
                   )}
