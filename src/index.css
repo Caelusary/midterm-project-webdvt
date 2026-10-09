@@ -11,7 +11,7 @@
   --surface-3: #efeee8;
   --text: #1a1c18;
   --text-soft: #4a4e47;
-  --muted: #737870;
+  --muted: #62675f;
   --border: #e3e1d8;
   --border-strong: #cfccc0;
 
@@ -24,6 +24,8 @@
   --income-soft: #e4f0e8;
   --expense: #b8503a;
   --expense-soft: #f8e8e3;
+  /* Expense text on the soft expense tint; plain --expense is 4.15:1 there. */
+  --expense-strong: #9c3f2b;
 
   --panda-dark: #232420;
   --panda-face: #ffffff;
@@ -68,6 +70,7 @@
   --income-soft: #1d2f23;
   --expense: #e08d78;
   --expense-soft: #34211c;
+  --expense-strong: #e08d78;
 
   --panda-dark: #0d0f0c;
   --panda-face: #e9e7df;
@@ -97,7 +100,7 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-family: 'Plus Jakarta Sans Variable', 'Plus Jakarta Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
   font-size: 15px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -204,6 +207,37 @@ a { color: var(--accent-text); }
 .settings-head h2 { margin-bottom: 2px; }
 .settings-head .page-sub { margin: 0; }
 .settings-control { width: 220px; }
+
+.backup-panel { display: grid; gap: 14px; }
+.backup-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.backup-panel .error { margin: 0; }
+.backup-confirm {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--expense);
+  border-radius: 12px;
+  background: var(--expense-soft);
+}
+.backup-confirm p { margin: 0; font-size: 14px; overflow-wrap: anywhere; }
+
+/* Shown above every page when loading had to repair stored data. */
+.storage-notice {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 0 0 18px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: var(--expense-soft);
+  color: var(--expense-strong);
+  font-size: 14px;
+  font-weight: 500;
+}
+.storage-notice p { margin: 0; flex: 1 1 240px; }
+.storage-notice a { color: inherit; }
 
 
 .content { padding: 34px 40px 80px; max-width: 1080px; width: 100%; }
@@ -340,7 +374,7 @@ a { color: var(--accent-text); }
 [data-theme='dark'] .button-primary { color: #0f1a13; }
 .button-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
 
-.button-danger { color: var(--expense); border-color: var(--expense); background: transparent; }
+.button-danger { color: var(--expense-strong); border-color: var(--expense-strong); background: transparent; }
 .button-danger:hover { background: var(--expense-soft); }
 
 .button:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
@@ -685,7 +719,7 @@ textarea { resize: vertical; }
 }
 
 .detail-tag.is-income { background: var(--income-soft); color: var(--income); }
-.detail-tag.is-expense { background: var(--expense-soft); color: var(--expense); }
+.detail-tag.is-expense { background: var(--expense-soft); color: var(--expense-strong); }
 
 .detail-title { margin: 12px 0 2px; }
 .detail-amount { margin: 0 0 18px; font-size: 34px; font-weight: 700; letter-spacing: -0.03em; }
@@ -883,7 +917,7 @@ textarea { resize: vertical; }
   background: var(--expense-soft);
   border-radius: 10px;
   font-size: 13px;
-  color: var(--expense);
+  color: var(--expense-strong);
   font-weight: 500;
 }
 
@@ -1155,7 +1189,7 @@ textarea { resize: vertical; }
 }
 
 .activity-tag.is-created { background: var(--income-soft); color: var(--income); }
-.activity-tag.is-deleted { background: var(--expense-soft); color: var(--expense); }
+.activity-tag.is-deleted { background: var(--expense-soft); color: var(--expense-strong); }
 .activity-tag.is-restored { background: var(--accent-soft); color: var(--accent-text); }
 
 .activity-time { font-size: 13px; color: var(--muted); white-space: nowrap; }
