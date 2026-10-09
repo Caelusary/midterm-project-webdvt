@@ -138,7 +138,7 @@ export default function CalculatorWidget() {
             ))}
           </div>
 
-          <p className="hint">Reads left to right — 10 + 5 × 2 is 30.</p>
+          <p className="hint">Reads left to right: 10 + 5 × 2 is 30.</p>
         </section>
       )}
     </>
