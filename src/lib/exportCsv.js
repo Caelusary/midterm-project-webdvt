@@ -30,7 +30,14 @@ const BOM = '\uFEFF'
 
 export function downloadCsv(filename, csv) {
   // The BOM makes Excel read the file as UTF-8; without it peso signs mangle.
-  const blob = new Blob([BOM, csv], { type: 'text/csv;charset=utf-8;' })
+  downloadBlob(filename, new Blob([BOM, csv], { type: 'text/csv;charset=utf-8;' }))
+}
+
+export function downloadJson(filename, data) {
+  downloadBlob(filename, new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }))
+}
+
+function downloadBlob(filename, blob) {
   const url = URL.createObjectURL(blob)
 
   const link = document.createElement('a')
