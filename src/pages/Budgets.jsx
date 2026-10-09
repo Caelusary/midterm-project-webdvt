@@ -133,7 +133,7 @@ export default function Budgets() {
           </p>
           <p className="hint">
             {totals.withLimits === 0
-              ? 'No limits set yet — pick a category below to start.'
+              ? 'No limits set yet. Pick a category below to start.'
               : `${totals.withLimits} of ${rows.length} categories have a limit${inMonthSuffix(period)}.${totals.over > 0 ? ` ${totals.over} over.` : ''}`}
           </p>
         </div>
